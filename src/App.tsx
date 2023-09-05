@@ -1,31 +1,49 @@
-import { useState } from 'react'
-import './App.css'
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import React from "react";
 
+import { getData, setData, signIn } from "./firebase";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA7uvtCPrfR_1rpEUqAPjKdfKCfZuFoblA",
-  authDomain: "chat-5afbf.firebaseapp.com",
-  projectId: "chat-5afbf",
-  storageBucket: "chat-5afbf.appspot.com",
-  messagingSenderId: "62634673045",
-  appId: "1:62634673045:web:fea6656d123d3fd1d7ac9c",
-  measurementId: "G-XJH5168Q6G"
-};
-
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-function App() {
-  
+const MyInput = (props) => {
+  const [value, setValue] = React.useState("");
+  const path = "users/" + props.uid + "/draft";
+  React.useEffect(() => {
+    getData(path).then((val) => {
+      setValue(val);
+    });
+  }, [path]);
 
   return (
-    <>
-          
-    </>
-  )
-}
+    <input
+      value={value}
+      onChange={(e) => {
+        const newValue = e.target.value;
+        setValue(newValue);
+        setData(path, newValue);
+      }}
+    />
+  );
+};
 
-export default App
+export const App = () => {
+  const [uid, setUid] = React.useState("");
+  if (uid === "") {
+    return (
+      <button
+        onClick={() => {
+          signIn().then((newUid) => {
+            setUid(newUid);
+          });
+        }}
+      >
+        sign in
+      </button>
+    );
+  }
+  return (
+    <div>
+      <MyInput uid={uid} />
+    </div>
+  );
+};
+
+export default App;
+
